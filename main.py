@@ -1,4 +1,5 @@
 import pygame
+from random import randint
 from pygame.locals import *
 
 
@@ -14,27 +15,40 @@ def createGrid():
     return grid
 
 
-def drawThings(surface):
+def populateGrid(grid):
+    # Amount of obstacles dispersed on grid
+    obstacle_count = 25
+
+    # Some obstacles might overlap...
+    for i in range(obstacle_count):
+        grid[randint(0, 18)][randint(0, 18)] = 2
+
+    # Random Positions for hider and seeker
+    grid[randint(0, 18)][randint(0, 18)] = 0  # Seeker
+    grid[randint(0, 18)][randint(0, 18)] = 1  # Hider
+
+    return grid
+
+
+def drawThings(surface, grid):
     red = (255, 0, 0)
     blue = (0, 0, 255)
-    yellow = (100, 100, 100)
+    yellow = (250, 218, 94)
     default = '#202020'
-
-    grid = createGrid()
-    grid[18][5] = 0
 
     # Margin between tiles
     margin = 2
     dimension = 40  # Width and Height of Tiles
-
-    # Default empty-tile color
-    color = default
 
     # Draw Grid
     for i in range(19):
         for j in range(19):
             if grid[i][j] == 0:
                 color = red
+            elif grid[i][j] == 1:
+                color = blue
+            elif grid[i][j] == 2:
+                color = yellow
             else:
                 color = default
             pygame.draw.rect(surface, color,
@@ -55,6 +69,8 @@ def main():
     background = pygame.Surface((width, height))
     background.fill(pygame.Color(248, 248, 255))  # Background Color
 
+    grid = populateGrid(createGrid())
+
     running = True
 
     while running:
@@ -65,7 +81,8 @@ def main():
                 print("Click")
 
         surface.blit(background, (0, 0))
-        drawThings(surface)
+
+        drawThings(surface, grid)
 
         pygame.display.flip()
         pygame.display.update()
