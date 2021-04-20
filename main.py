@@ -1,6 +1,48 @@
 import pygame
 from random import randint
+from random import seed
 from pygame.locals import *
+
+
+class Seeker:
+    def __init__(self, grid, x, y):
+        self.grid = grid
+        self.x = x  # X-Coordinate inside Grid
+        self.y = y  # Y-Coordinate inside Grid
+        self.grid[x][y] = 0  # Add Seeker (color)
+
+    def move(self, direction):
+        # Check for out-of-bounds
+        if (direction == 1 and (self.y + 1 >= len(self.grid[0]))) or (
+                direction == 2 and (self.x + 1 >= len(self.grid))) or (
+                    direction == 3 and (self.y-1 < 0)) or (
+                        direction == 0 and (self.x-1 < 0)):
+            print("Out of Bounds!")
+            return self.grid
+        # 0: Up 1: Right 2: Down 3: Left
+        # Right
+        if direction == 1 and self.grid[self.x][self.y + 1] == 3:
+            self.grid[self.x][self.y + 1] = 0  # 0 is seeker. more generally: self.grid[self.x][self.y]
+            self.grid[self.x][self.y] = 3  # 3 is empty tile.
+            self.y += 1  # Update location
+        # Down
+        elif direction == 2 and self.grid[self.x + 1][self.y] == 3:
+            self.grid[self.x + 1][self.y] = 0  # 0 is seeker. more generally: self.grid[self.x][self.y]
+            self.grid[self.x][self.y] = 3  # 3 is empty tile.
+            self.x += 1
+        # Left
+        elif direction == 3 and self.grid[self.x][self.y - 1] == 3:
+            self.grid[self.x][self.y - 1] = 0  # 0 is seeker. more generally: self.grid[self.x][self.y]
+            self.grid[self.x][self.y] = 3  # 3 is empty tile.
+            self.y -= 1
+        # Up
+        elif direction == 0 and self.grid[self.x - 1][self.y] == 3:
+            self.grid[self.x - 1][self.y] = 0  # 0 is seeker. more generally: self.grid[self.x][self.y]
+            self.grid[self.x][self.y] = 3  # 3 is empty tile.
+            self.x -= 1
+
+        # else: penalise walking against wall.
+        return self.grid
 
 
 def createGrid():
@@ -16,15 +58,20 @@ def createGrid():
 
 
 def populateGrid(grid):
+    seed(1)
+    global seeker
     # Amount of obstacles dispersed on grid
-    obstacle_count = 25
+    obstacle_count = 30
 
     # Some obstacles might overlap...
     for i in range(obstacle_count):
         grid[randint(0, 18)][randint(0, 18)] = 2
 
     # Random Positions for hider and seeker
-    grid[randint(0, 18)][randint(0, 18)] = 0  # Seeker
+    seeker = Seeker(grid, randint(0, 18), randint(0, 18))
+    grid = seeker.grid  # Updated Grid with seeker in it.
+
+    # grid[randint(0, 18)][randint(0, 18)] = 0  # Seeker
     grid[randint(0, 18)][randint(0, 18)] = 1  # Hider
 
     return grid
@@ -55,6 +102,7 @@ def drawThings(surface, grid):
                              pygame.Rect((margin + dimension) * j + margin,
                                          (margin + dimension) * i + margin,
                                          dimension, dimension))
+    grid = seeker.move(0)
 
 
 def main():
@@ -62,6 +110,9 @@ def main():
     # GUI Dimensions
     width = 800
     height = 800
+
+    FPS = 30  # frames per second setting
+    fpsClock = pygame.time.Clock()
 
     pygame.display.set_caption('Hide and Seek')
     surface = pygame.display.set_mode((width, height))
@@ -72,6 +123,7 @@ def main():
     grid = populateGrid(createGrid())
 
     running = True
+    control = 0
 
     while running:
         for event in pygame.event.get():
@@ -86,6 +138,7 @@ def main():
 
         pygame.display.flip()
         pygame.display.update()
+        fpsClock.tick(FPS)
 
 
 if __name__ == '__main__':
