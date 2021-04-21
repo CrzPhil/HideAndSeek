@@ -4,6 +4,45 @@ from random import seed
 from pygame.locals import *
 import constants
 
+'''
+https://www.redblobgames.com/grids/line-drawing.html for the line-drawing
+'''
+
+
+# Linear Interpolation
+def lerp(start, end, t):
+    return start + t * end
+
+
+# Return Point on Line between two points
+def lerp_point(p0, p1, t):
+    return (lerp(p0[0], p1[0], t),
+            lerp(p0[1], p1[1], t))
+
+
+# Round potential floats to ints; Note: Python3 rounds x.5 DOWN -> i.e round(2.5) = 2
+def round_point(p):
+    return round(p[0]), round(p[1])
+
+
+# Diagonal Distance between two points
+def distance(p0, p1):
+    dx = p1[0] - p0[0]
+    dy = p1[1] - p0[1]
+    return max(abs(dx), abs(dy))
+
+
+# Draw line between two points
+def line(p0, p1):
+    points = []
+    N = distance(p0, p1)
+    for step in range(N+1):
+        if N == 0:
+            t = 0
+        else:
+            t = step/N
+        points.append(round_point(lerp_point(p0, p1, t)))
+
 
 class Seeker:
     def __init__(self, grid, x, y):
