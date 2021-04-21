@@ -2,6 +2,7 @@ import pygame
 from random import randint
 from random import seed
 from pygame.locals import *
+import constants
 
 
 class Seeker:
@@ -17,7 +18,7 @@ class Seeker:
                 direction == 2 and (self.x + 1 >= len(self.grid))) or (
                     direction == 3 and (self.y-1 < 0)) or (
                         direction == 0 and (self.x-1 < 0)):
-            print("Out of Bounds!")
+            print("Seeker Out of Bounds!")
             return self.grid
         # 0: Up 1: Right 2: Down 3: Left
         # Right
@@ -44,86 +45,117 @@ class Seeker:
         # else: penalise walking against wall.
         return self.grid
 
+    def drawRay(self):
+        pass
+
+
+class Hider:
+    def __init__(self, grid, x, y):
+        self.grid = grid
+        self.x = x  # X-Coordinate inside Grid
+        self.y = y  # Y-Coordinate inside Grid
+        self.grid[x][y] = 1  # Add Seeker (color)
+
+    def move(self, direction):
+        # Check for out-of-bounds
+        if (direction == 1 and (self.y + 1 >= len(self.grid[0]))) or (
+                direction == 2 and (self.x + 1 >= len(self.grid))) or (
+                    direction == 3 and (self.y-1 < 0)) or (
+                        direction == 0 and (self.x-1 < 0)):
+            print("Hider Out of Bounds!")
+            return self.grid
+        # 0: Up 1: Right 2: Down 3: Left
+        # Right
+        if direction == 1 and self.grid[self.x][self.y + 1] == 3:
+            self.grid[self.x][self.y + 1] = 1  # 1 is hider. more generally: self.grid[self.x][self.y]
+            self.grid[self.x][self.y] = 3  # 3 is empty tile.
+            self.y += 1  # Update location
+        # Down
+        elif direction == 2 and self.grid[self.x + 1][self.y] == 3:
+            self.grid[self.x + 1][self.y] = 1  # 1 is hider. more generally: self.grid[self.x][self.y]
+            self.grid[self.x][self.y] = 3  # 3 is empty tile.
+            self.x += 1
+        # Left
+        elif direction == 3 and self.grid[self.x][self.y - 1] == 3:
+            self.grid[self.x][self.y - 1] = 1  # 1 is hider. more generally: self.grid[self.x][self.y]
+            self.grid[self.x][self.y] = 3  # 3 is empty tile.
+            self.y -= 1
+        # Up
+        elif direction == 0 and self.grid[self.x - 1][self.y] == 3:
+            self.grid[self.x - 1][self.y] = 1  # 1 is hider. more generally: self.grid[self.x][self.y]
+            self.grid[self.x][self.y] = 3  # 3 is empty tile.
+            self.x -= 1
+
+        # else: penalise walking against wall.
+        return self.grid
+
 
 def createGrid():
     # Create Grid of Numbers/Objects
     grid = []
-    for row in range(19):
+    for row in range(constants.GRID_SIZE):
         # For each row, we create a list that will represent an entire row
         grid.append([])
-        for column in range(19):
+        for column in range(constants.GRID_SIZE):
             grid[row].append(3)
     # grid = [[3 for x in range(10)] for y in range(10)] -> Shortcut
     return grid
 
 
 def populateGrid(grid):
-    seed(1)
-    global seeker
-    # Amount of obstacles dispersed on grid
-    obstacle_count = 30
+    global seeker, hider
 
     # Some obstacles might overlap...
-    for i in range(obstacle_count):
-        grid[randint(0, 18)][randint(0, 18)] = 2
+    for i in range(constants.OBSTACLE_COUNT):
+        grid[randint(0, constants.GRID_SIZE-1)][randint(0, constants.GRID_SIZE-1)] = 2
 
     # Random Positions for hider and seeker
-    seeker = Seeker(grid, randint(0, 18), randint(0, 18))
+    seeker = Seeker(grid, randint(0, constants.GRID_SIZE-1), randint(0, constants.GRID_SIZE-1))
     grid = seeker.grid  # Updated Grid with seeker in it.
+    hider = Hider(grid, randint(0, constants.GRID_SIZE-1), randint(0, constants.GRID_SIZE-1))
+    grid = hider.grid
 
-    # grid[randint(0, 18)][randint(0, 18)] = 0  # Seeker
-    grid[randint(0, 18)][randint(0, 18)] = 1  # Hider
+    # grid[randint(0, constants.GRID_SIZE-1)][randint(0, constants.GRID_SIZE-1)] = 0  # Seeker
+    # grid[randint(0, constants.GRID_SIZE-1)][randint(0, constants.GRID_SIZE-1)] = 1  # Hider
 
     return grid
 
 
 def drawThings(surface, grid):
-    red = (255, 0, 0)
-    blue = (0, 0, 255)
-    yellow = (250, 218, 94)
-    default = '#202020'
-
-    # Margin between tiles
-    margin = 2
-    dimension = 40  # Width and Height of Tiles
-
     # Draw Grid
-    for i in range(19):
-        for j in range(19):
+    for i in range(constants.GRID_SIZE):
+        for j in range(constants.GRID_SIZE):
             if grid[i][j] == 0:
-                color = red
+                color = constants.SEEKER_COLOR
             elif grid[i][j] == 1:
-                color = blue
+                color = constants.HIDER_COLOR
             elif grid[i][j] == 2:
-                color = yellow
+                color = constants.WALL_COLOR
             else:
-                color = default
+                color = constants.BACKGROUND
             pygame.draw.rect(surface, color,
-                             pygame.Rect((margin + dimension) * j + margin,
-                                         (margin + dimension) * i + margin,
-                                         dimension, dimension))
-    grid = seeker.move(0)
+                             pygame.Rect((constants.MARGIN + constants.TILE_SIZE) * j + constants.MARGIN,
+                                         (constants.MARGIN + constants.TILE_SIZE) * i + constants.MARGIN,
+                                         constants.TILE_SIZE, constants.TILE_SIZE))
+    # seeker.move(randint(0, 3))
+    # hider.move(randint(0, 3))
 
 
 def main():
     pygame.init()
-    # GUI Dimensions
-    width = 800
-    height = 800
 
     FPS = 30  # frames per second setting
     fpsClock = pygame.time.Clock()
 
     pygame.display.set_caption('Hide and Seek')
-    surface = pygame.display.set_mode((width, height))
+    surface = pygame.display.set_mode((constants.WINDOW_WIDTH, constants.WINDOW_HEIGHT))
 
-    background = pygame.Surface((width, height))
+    background = pygame.Surface((constants.WINDOW_WIDTH, constants.WINDOW_HEIGHT))
     background.fill(pygame.Color(248, 248, 255))  # Background Color
 
     grid = populateGrid(createGrid())
 
     running = True
-    control = 0
 
     while running:
         for event in pygame.event.get():
