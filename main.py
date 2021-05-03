@@ -36,12 +36,57 @@ def distance(p0, p1):
 def line(p0, p1):
     points = []
     N = distance(p0, p1)
-    for step in range(N+1):
+    for step in range(N):
         if N == 0:
             t = 0
         else:
             t = step/N
         points.append(round_point(lerp_point(p0, p1, t)))
+    return points
+
+
+def look(grid: list, pos_x: int, pos_y: int):
+    # Line of Sight [0] - UP [1] - RIGHT [2] - DOWN [3] - LEFT
+    los = [[], [], [], []]
+    # 4 Directions:
+    for i in range(4):
+        if i == 0:
+            # Check for Out-of-Bounds Up
+            if pos_x - constants.MAX_DISTANCE < 0:
+                # If there is at least one square before out-of-bounds
+                if pos_x - constants.MAX_DISTANCE + 1 >= 0:
+                    for j in range(1, constants.MAX_DISTANCE):
+                        los[0].append(grid[pos_x - j][pos_y])
+                elif pos_x - constants.MAX_DISTANCE + 2 >= 0:
+                    for j in range(1, constants.MAX_DISTANCE - 1):
+                        los[0].append(grid[pos_x - j][pos_y])
+            else:
+                for j in range(1, constants.MAX_DISTANCE + 1):
+                    los[0].append(grid[pos_x - j][pos_y])
+        elif i == 1:
+            # Check for Out-of-Bounds RIGHT
+            if pos_y + constants.MAX_DISTANCE >= constants.GRID_SIZE:
+                if pos_y + constants.MAX_DISTANCE + 1 >= 0:
+                    for j in range(1, constants.MAX_DISTANCE):
+                        los[0].append(grid[pos_x - j][pos_y])
+            else:
+                for j in range(1, constants.MAX_DISTANCE + 1):
+                    los[1].append(grid[pos_x][pos_y+j])
+        elif i == 2:
+            # Check for Out-of-Bounds DOWN
+            if pos_x + constants.MAX_DISTANCE >= constants.GRID_SIZE:
+                pass
+            else:
+                for j in range(1, constants.MAX_DISTANCE + 1):
+                    los[2].append(grid[pos_x + j][pos_y])
+        elif i == 3:
+            # Check for Out-of-Bounds LEFT
+            if pos_y - constants.MAX_DISTANCE < 0:
+                pass
+            else:
+                for j in range(1, constants.MAX_DISTANCE + 1):
+                    los[3].append(grid[pos_x][pos_y - j])
+    print(los)
 
 
 class Seeker:
@@ -85,7 +130,9 @@ class Seeker:
         return self.grid
 
     def drawRay(self):
-        pass
+        # Y and X are flipped, since in 2D arrays[x][y] y is the column, and x the row
+        los = line((self.y, self.x), (self.y, self.x+3))    # Line of Sight Up
+        print(los)
 
 
 class Hider:
@@ -149,7 +196,8 @@ def populateGrid(grid):
         grid[randint(0, constants.GRID_SIZE-1)][randint(0, constants.GRID_SIZE-1)] = 2
 
     # Random Positions for hider and seeker
-    seeker = Seeker(grid, randint(0, constants.GRID_SIZE-1), randint(0, constants.GRID_SIZE-1))
+    # seeker = Seeker(grid, randint(0, constants.GRID_SIZE-1), randint(0, constants.GRID_SIZE-1))
+    seeker = Seeker(grid, 2, 2)
     grid = seeker.grid  # Updated Grid with seeker in it.
     hider = Hider(grid, randint(0, constants.GRID_SIZE-1), randint(0, constants.GRID_SIZE-1))
     grid = hider.grid
@@ -177,6 +225,7 @@ def drawThings(surface, grid):
                                          (constants.MARGIN + constants.TILE_SIZE) * i + constants.MARGIN,
                                          constants.TILE_SIZE, constants.TILE_SIZE))
     # seeker.move(randint(0, 3))
+    look(grid, seeker.x, seeker.y)
     # hider.move(randint(0, 3))
 
 
