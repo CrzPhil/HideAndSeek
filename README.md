@@ -11,5 +11,5 @@ There's the seeker (red) and the hider (blue).
 * Comparing Results between solely training the seeker agent and adversarial training with the hider
 
 ## Demo
-![Demo](./images/betterDemo.gif)
+![Demo](./Images/betterDemo.gif)
 
