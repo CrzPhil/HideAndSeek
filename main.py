@@ -54,21 +54,36 @@ def look(grid: list, pos_x: int, pos_y: int):
             # Check for Out-of-Bounds Up
             if pos_x - constants.MAX_DISTANCE < 0:
                 # If there is at least one square before out-of-bounds
-                if pos_x - constants.MAX_DISTANCE + 1 >= 0:
+                if pos_x - constants.MAX_DISTANCE + 1 == 0:
                     for j in range(1, constants.MAX_DISTANCE):
                         los[0].append(grid[pos_x - j][pos_y])
-                elif pos_x - constants.MAX_DISTANCE + 2 >= 0:
+                # If there are two squares before o-o-b
+                elif pos_x - constants.MAX_DISTANCE + 2 == 0:
                     for j in range(1, constants.MAX_DISTANCE - 1):
                         los[0].append(grid[pos_x - j][pos_y])
+                # If there are three squares before o-o-b
+                elif pos_x - constants.MAX_DISTANCE + 3 == 0:
+                    for j in range(1, constants.MAX_DISTANCE - 2):
+                        los[0].append(grid[pos_x - j][pos_y])
+            # If everything is within range
             else:
                 for j in range(1, constants.MAX_DISTANCE + 1):
                     los[0].append(grid[pos_x - j][pos_y])
         elif i == 1:
             # Check for Out-of-Bounds RIGHT
             if pos_y + constants.MAX_DISTANCE >= constants.GRID_SIZE:
-                if pos_y + constants.MAX_DISTANCE + 1 >= 0:
+                # If there are two squares before o-o-b
+                if pos_y + constants.MAX_DISTANCE - 1 == constants.GRID_SIZE - 1:
                     for j in range(1, constants.MAX_DISTANCE):
-                        los[0].append(grid[pos_x - j][pos_y])
+                        los[1].append(grid[pos_x][pos_y + j])
+                # If there is one square before o-o-b
+                elif pos_y + constants.MAX_DISTANCE - 2 == constants.GRID_SIZE - 1:
+                    for j in range(1, constants.MAX_DISTANCE - 1):
+                        los[1].append(grid[pos_x][pos_y + j])
+                # Range 4 Tile one before o-o-b
+                elif pos_y + constants.MAX_DISTANCE - 3 == constants.GRID_SIZE - 1:
+                    for j in range(1, constants.MAX_DISTANCE - 2):
+                        los[1].append(grid[pos_x][pos_y + j])
             else:
                 for j in range(1, constants.MAX_DISTANCE + 1):
                     los[1].append(grid[pos_x][pos_y+j])
@@ -196,14 +211,11 @@ def populateGrid(grid):
         grid[randint(0, constants.GRID_SIZE-1)][randint(0, constants.GRID_SIZE-1)] = 2
 
     # Random Positions for hider and seeker
-    # seeker = Seeker(grid, randint(0, constants.GRID_SIZE-1), randint(0, constants.GRID_SIZE-1))
-    seeker = Seeker(grid, 2, 2)
+    seeker = Seeker(grid, randint(0, constants.GRID_SIZE-1), randint(0, constants.GRID_SIZE-1))
+    # seeker = Seeker(grid, 1, 5)
     grid = seeker.grid  # Updated Grid with seeker in it.
     hider = Hider(grid, randint(0, constants.GRID_SIZE-1), randint(0, constants.GRID_SIZE-1))
     grid = hider.grid
-
-    # grid[randint(0, constants.GRID_SIZE-1)][randint(0, constants.GRID_SIZE-1)] = 0  # Seeker
-    # grid[randint(0, constants.GRID_SIZE-1)][randint(0, constants.GRID_SIZE-1)] = 1  # Hider
 
     return grid
 
@@ -224,9 +236,10 @@ def drawThings(surface, grid):
                              pygame.Rect((constants.MARGIN + constants.TILE_SIZE) * j + constants.MARGIN,
                                          (constants.MARGIN + constants.TILE_SIZE) * i + constants.MARGIN,
                                          constants.TILE_SIZE, constants.TILE_SIZE))
-    # seeker.move(randint(0, 3))
+    seeker.move(randint(0, 3))
     look(grid, seeker.x, seeker.y)
-    # hider.move(randint(0, 3))
+    hider.move(randint(0, 3))
+    pygame.time.delay(100)
 
 
 def main():
