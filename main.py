@@ -45,6 +45,7 @@ def line(p0, p1):
     return points
 
 
+# Creates 2D Array containing the type of tile within range in 4 dimensions
 def look(grid: list, pos_x: int, pos_y: int):
     # Line of Sight [0] - UP [1] - RIGHT [2] - DOWN [3] - LEFT
     los = [[], [], [], []]
@@ -56,48 +57,70 @@ def look(grid: list, pos_x: int, pos_y: int):
                 # If there is at least one square before out-of-bounds
                 if pos_x - constants.MAX_DISTANCE + 1 == 0:
                     for j in range(1, constants.MAX_DISTANCE):
-                        los[0].append(grid[pos_x - j][pos_y])
+                        los[i].append(grid[pos_x - j][pos_y])
                 # If there are two squares before o-o-b
                 elif pos_x - constants.MAX_DISTANCE + 2 == 0:
                     for j in range(1, constants.MAX_DISTANCE - 1):
-                        los[0].append(grid[pos_x - j][pos_y])
+                        los[i].append(grid[pos_x - j][pos_y])
                 # If there are three squares before o-o-b
                 elif pos_x - constants.MAX_DISTANCE + 3 == 0:
                     for j in range(1, constants.MAX_DISTANCE - 2):
-                        los[0].append(grid[pos_x - j][pos_y])
+                        los[i].append(grid[pos_x - j][pos_y])
             # If everything is within range
             else:
                 for j in range(1, constants.MAX_DISTANCE + 1):
-                    los[0].append(grid[pos_x - j][pos_y])
+                    los[i].append(grid[pos_x - j][pos_y])
         elif i == 1:
             # Check for Out-of-Bounds RIGHT
             if pos_y + constants.MAX_DISTANCE >= constants.GRID_SIZE:
                 # If there are two squares before o-o-b
                 if pos_y + constants.MAX_DISTANCE - 1 == constants.GRID_SIZE - 1:
                     for j in range(1, constants.MAX_DISTANCE):
-                        los[1].append(grid[pos_x][pos_y + j])
+                        los[i].append(grid[pos_x][pos_y + j])
                 # If there is one square before o-o-b
                 elif pos_y + constants.MAX_DISTANCE - 2 == constants.GRID_SIZE - 1:
                     for j in range(1, constants.MAX_DISTANCE - 1):
-                        los[1].append(grid[pos_x][pos_y + j])
+                        los[i].append(grid[pos_x][pos_y + j])
                 # Range 4 Tile one before o-o-b
                 elif pos_y + constants.MAX_DISTANCE - 3 == constants.GRID_SIZE - 1:
                     for j in range(1, constants.MAX_DISTANCE - 2):
-                        los[1].append(grid[pos_x][pos_y + j])
+                        los[i].append(grid[pos_x][pos_y + j])
             else:
                 for j in range(1, constants.MAX_DISTANCE + 1):
-                    los[1].append(grid[pos_x][pos_y+j])
+                    los[i].append(grid[pos_x][pos_y+j])
         elif i == 2:
             # Check for Out-of-Bounds DOWN
             if pos_x + constants.MAX_DISTANCE >= constants.GRID_SIZE:
-                pass
+                # If there are two squares before o-o-b
+                if pos_x + constants.MAX_DISTANCE - 1 == constants.GRID_SIZE - 1:
+                    for j in range(1, constants.MAX_DISTANCE):
+                        los[i].append(grid[pos_x + j][pos_y])
+                # If there is one square before o-o-b
+                elif pos_x + constants.MAX_DISTANCE - 2 == constants.GRID_SIZE - 1:
+                    for j in range(1, constants.MAX_DISTANCE - 1):
+                        los[i].append(grid[pos_x + j][pos_y])
+                # Range 4 Tile one before o-o-b
+                elif pos_x + constants.MAX_DISTANCE - 3 == constants.GRID_SIZE - 1:
+                    for j in range(1, constants.MAX_DISTANCE - 2):
+                        los[i].append(grid[pos_x + j][pos_y])
             else:
                 for j in range(1, constants.MAX_DISTANCE + 1):
                     los[2].append(grid[pos_x + j][pos_y])
         elif i == 3:
             # Check for Out-of-Bounds LEFT
             if pos_y - constants.MAX_DISTANCE < 0:
-                pass
+                # If there are two squares before o-o-b
+                if pos_y - (constants.MAX_DISTANCE - 1) == 0:
+                    for j in range(1, constants.MAX_DISTANCE):
+                        los[i].append(grid[pos_x][pos_y - j])
+                # If there is one square before o-o-b
+                elif pos_y - (constants.MAX_DISTANCE - 2) == 0:
+                    for j in range(1, constants.MAX_DISTANCE - 1):
+                        los[i].append(grid[pos_x][pos_y - j])
+                # Range 4 Tile one before o-o-b
+                elif pos_y - (constants.MAX_DISTANCE - 3) == 0:
+                    for j in range(1, constants.MAX_DISTANCE - 2):
+                        los[i].append(grid[pos_x][pos_y - j])
             else:
                 for j in range(1, constants.MAX_DISTANCE + 1):
                     los[3].append(grid[pos_x][pos_y - j])
@@ -211,8 +234,8 @@ def populateGrid(grid):
         grid[randint(0, constants.GRID_SIZE-1)][randint(0, constants.GRID_SIZE-1)] = 2
 
     # Random Positions for hider and seeker
-    seeker = Seeker(grid, randint(0, constants.GRID_SIZE-1), randint(0, constants.GRID_SIZE-1))
-    # seeker = Seeker(grid, 1, 5)
+    # seeker = Seeker(grid, randint(0, constants.GRID_SIZE-1), randint(0, constants.GRID_SIZE-1))
+    seeker = Seeker(grid, 5, 2)
     grid = seeker.grid  # Updated Grid with seeker in it.
     hider = Hider(grid, randint(0, constants.GRID_SIZE-1), randint(0, constants.GRID_SIZE-1))
     grid = hider.grid
@@ -245,7 +268,6 @@ def drawThings(surface, grid):
 def main():
     pygame.init()
 
-    FPS = 30  # frames per second setting
     fpsClock = pygame.time.Clock()
 
     pygame.display.set_caption('Hide and Seek')
@@ -271,7 +293,7 @@ def main():
 
         pygame.display.flip()
         pygame.display.update()
-        fpsClock.tick(FPS)
+        fpsClock.tick(constants.FPS)
 
 
 if __name__ == '__main__':

@@ -17,6 +17,7 @@ BACKGROUND = '#202020'
 
 # Settings
 MAX_DISTANCE = 3  # Has to be at least 1
+FPS = 5
 
 # GUI
 WINDOW_WIDTH = TILE_SIZE * GRID_SIZE + GRID_SIZE * MARGIN
