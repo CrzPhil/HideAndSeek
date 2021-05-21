@@ -172,6 +172,13 @@ class Seeker:
         los = line((self.y, self.x), (self.y, self.x+3))    # Line of Sight Up
         print(los)
 
+    # Tag, aka collide with the Hider (if it is there)
+    def tag(self, hiderx, hidery):
+        if distance((self.x, self.y), (hiderx, hidery)) == 1:
+            return True
+        else:
+            return False
+
 
 class Hider:
     def __init__(self, grid, x, y):
